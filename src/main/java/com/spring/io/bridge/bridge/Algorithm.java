@@ -1,0 +1,212 @@
+package com.spring.io.bridge.bridge;
+
+import java.util.*;
+
+public class Algorithm {
+    public static String calculate(BridgeApplication.ArenaUpdate arenaUpdate) {
+        List<String> commands = new ArrayList<>();
+        int totalX = arenaUpdate.arena.dims.get(0);
+        int totalY = arenaUpdate.arena.dims.get(1);
+
+        if (fightPossible(arenaUpdate)) {
+            return "T";
+        } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x < totalX
+                && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y < totalY) {
+            // Center
+            commands.add("F");
+            commands.add("L");
+            commands.add("R");
+
+        } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x == 0) {
+            // Left
+            if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y == 0) {
+                // Top Left
+                if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S")) {
+                    return "L";
+                } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E")) {
+                    return "R";
+                }
+            } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y == totalY) {
+                // Bottom Left
+                if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N")) {
+                    return "R";
+                } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E")) {
+                    return "L";
+                }
+            } else {
+                // Left
+                switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+                    case "W":
+                    case "E":
+                        commands.add("L");
+                        commands.add("R");
+                        break;
+                    case "S":
+                        commands.add("F");
+                        commands.add("L");
+                        break;
+                    case "N":
+                        commands.add("F");
+                        commands.add("R");
+                        break;
+                }
+            }
+
+        } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x == totalX) {
+            // Right
+            if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y == 0) {
+                // Top Right
+                if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S")) {
+                    return "R";
+                } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W")) {
+                    return "L";
+                }
+            } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y.equals(arenaUpdate.arena.dims.get(1))) {
+                // Bottom Right
+                if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N")) {
+                    return "L";
+                } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S") ||
+                        arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W")) {
+                    return "R";
+                }
+            } else {
+                // Right
+                switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+                    case "W":
+                    case "E":
+                        commands.add("L");
+                        commands.add("R");
+                        break;
+                    case "S":
+                        commands.add("F");
+                        commands.add("R");
+                        break;
+                    case "N":
+                        commands.add("F");
+                        commands.add("L");
+                        break;
+                }
+            }
+
+        } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y == 0) {
+            // Top
+            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+                case "N":
+                case "S":
+                    commands.add("L");
+                    commands.add("R");
+                    break;
+                case "W":
+                    commands.add("L");
+                    commands.add("F");
+                    break;
+                case "E":
+                    commands.add("R");
+                    commands.add("F");
+                    break;
+            }
+
+        } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y == totalY) {
+//			Bottom
+            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+                case "N":
+                case "S":
+                    commands.add("L");
+                    commands.add("R");
+                    break;
+                case "W":
+                    commands.add("R");
+                    commands.add("F");
+                    break;
+                case "E":
+                    commands.add("L");
+                    commands.add("F");
+                    break;
+            }
+        }
+
+        int i = new Random().nextInt(4);
+        return commands.get(i);
+    }
+
+    private static boolean fightPossible(BridgeApplication.ArenaUpdate arenaUpdate) {
+        int actionRatio = 0;
+        int direction = 0;
+        switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+            case "N":
+                direction = 1;
+                actionRatio = -3;
+                break;
+            case "W":
+                direction = 0;
+                actionRatio = -3;
+                break;
+            case "E":
+                direction = 0;
+                actionRatio = 3;
+                break;
+            case "S":
+                direction = 1;
+                actionRatio = 3;
+
+        }
+        if (direction == 1) {
+            return checkEnemiesDirectionY(arenaUpdate, actionRatio);
+        } else {
+            return checkEnemiesDirectionX(arenaUpdate, actionRatio);
+        }
+
+    }
+
+    private static boolean checkEnemiesDirectionX(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
+        Iterator<Map.Entry<String, BridgeApplication.PlayerState>> iterator = arenaUpdate.arena.state.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, BridgeApplication.PlayerState> e = iterator.next();
+            String s = e.getKey();
+            BridgeApplication.PlayerState p = e.getValue();
+            if (!s.equals(arenaUpdate._links.self.href)) {
+                if (actionRatio < 0) {
+                    if (p.x > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio
+                            && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)
+                        return true;
+                } else {
+                    if (p.x > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x
+                            && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio)
+                        return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkEnemiesDirectionY(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
+
+        Iterator<Map.Entry<String, BridgeApplication.PlayerState>> iterator = arenaUpdate.arena.state.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, BridgeApplication.PlayerState> e = iterator.next();
+            String s = e.getKey();
+            BridgeApplication.PlayerState p = e.getValue();
+            if (!s.equals(arenaUpdate._links.self.href)) {
+                if (actionRatio < 0) {
+                    if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio
+                            && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)
+                        return true;
+                } else {
+                    if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y
+                            && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio)
+                        return true;
+                }
+
+            }
+        }
+        return false;
+    }
+}
