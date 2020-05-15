@@ -132,7 +132,7 @@ public class Algorithm {
             }
         }
 
-        int i = new Random().nextInt(4);
+        int i = new Random().nextInt(commands.size());
         return commands.get(i);
     }
 
