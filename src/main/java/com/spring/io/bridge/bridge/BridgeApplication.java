@@ -67,7 +67,9 @@ public class BridgeApplication {
             if (fightPossible(arenaUpdate)) {
                 return "T";
             } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x < totalX
-                    && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y < totalY) {
+                    && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y < totalY
+                    && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x > 0
+                    && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y > 0) {
                 // Center
                 commands.add("F");
                 commands.add("L");
