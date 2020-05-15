@@ -220,7 +220,8 @@ public class BridgeApplication {
                 Map.Entry<String, BridgeApplication.PlayerState> e = iterator.next();
                 String s = e.getKey();
                 BridgeApplication.PlayerState p = e.getValue();
-                if (!s.equals(arenaUpdate._links.self.href)) {
+                if (!s.equals(arenaUpdate._links.self.href)
+                        && p.y.equals(arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)) {
                     if (actionRatio < 0) {
                         if (p.x >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio)
                                 && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)
@@ -241,7 +242,8 @@ public class BridgeApplication {
             for (Map.Entry<String, PlayerState> e : arenaUpdate.arena.state.entrySet()) {
                 String s = e.getKey();
                 PlayerState p = e.getValue();
-                if (!s.equals(arenaUpdate._links.self.href)) {
+                if (!s.equals(arenaUpdate._links.self.href)
+                        && p.x.equals(arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)) {
                     if (actionRatio < 0) {
                         if (p.y >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio)
                                 && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)
