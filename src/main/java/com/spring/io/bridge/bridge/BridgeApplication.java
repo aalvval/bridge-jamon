@@ -60,7 +60,7 @@ public class BridgeApplication {
     static class Algorithm {
         public static String calculate(BridgeApplication.ArenaUpdate arenaUpdate) {
             List<String> commands = new ArrayList<>();
-            commands.add("T");
+//            commands.add("T");
             int totalX = arenaUpdate.arena.dims.get(0);
             int totalY = arenaUpdate.arena.dims.get(1);
 
@@ -193,32 +193,22 @@ public class BridgeApplication {
         }
 
         private static boolean fightPossible(BridgeApplication.ArenaUpdate arenaUpdate) {
-            return false;
-//            int actionRatio = 0;
-//            int direction = 0;
-//            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
-//                case "N":
-//                    direction = 1;
-//                    actionRatio = -3;
-//                    break;
-//                case "W":
-//                    direction = 0;
-//                    actionRatio = -3;
-//                    break;
-//                case "E":
-//                    direction = 0;
-//                    actionRatio = 3;
-//                    break;
-//                case "S":
-//                    direction = 1;
-//                    actionRatio = 3;
-//
-//            }
-//            if (direction == 1) {
-//                return checkEnemiesDirectionY(arenaUpdate, actionRatio);
-//            } else {
-//                return checkEnemiesDirectionX(arenaUpdate, actionRatio);
-//            }
+//            return false;
+            int actionRatio = 0;
+            int direction = 0;
+            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+                case "N":
+                    return checkEnemiesDirectionY(arenaUpdate, -3);
+                case "W":
+                    return checkEnemiesDirectionX(arenaUpdate, -3);
+                case "E":
+                    return checkEnemiesDirectionX(arenaUpdate, 3);
+                case "S":
+                    return checkEnemiesDirectionY(arenaUpdate, 3);
+                default:
+                    return false;
+
+            }
 
         }
 
@@ -230,12 +220,12 @@ public class BridgeApplication {
                 BridgeApplication.PlayerState p = e.getValue();
                 if (!s.equals(arenaUpdate._links.self.href)) {
                     if (actionRatio < 0) {
-                        if (p.x > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio
+                        if (p.x >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio)
                                 && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)
                             return true;
                     } else {
                         if (p.x > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x
-                                && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio)
+                                && (p.x <= arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio))
                             return true;
                     }
 
@@ -251,12 +241,12 @@ public class BridgeApplication {
                 PlayerState p = e.getValue();
                 if (!s.equals(arenaUpdate._links.self.href)) {
                     if (actionRatio < 0) {
-                        if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio
+                        if (p.y >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio)
                                 && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)
                             return true;
                     } else {
                         if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y
-                                && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio)
+                                && p.y <= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio))
                             return true;
                     }
 
