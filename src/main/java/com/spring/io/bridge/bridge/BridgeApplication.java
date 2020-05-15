@@ -60,6 +60,7 @@ public class BridgeApplication {
     static class Algorithm {
         public static String calculate(BridgeApplication.ArenaUpdate arenaUpdate) {
             List<String> commands = new ArrayList<>();
+            commands.add("T");
             int totalX = arenaUpdate.arena.dims.get(0);
             int totalY = arenaUpdate.arena.dims.get(1);
 
@@ -192,31 +193,32 @@ public class BridgeApplication {
         }
 
         private static boolean fightPossible(BridgeApplication.ArenaUpdate arenaUpdate) {
-            int actionRatio = 0;
-            int direction = 0;
-            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
-                case "N":
-                    direction = 1;
-                    actionRatio = -3;
-                    break;
-                case "W":
-                    direction = 0;
-                    actionRatio = -3;
-                    break;
-                case "E":
-                    direction = 0;
-                    actionRatio = 3;
-                    break;
-                case "S":
-                    direction = 1;
-                    actionRatio = 3;
-
-            }
-            if (direction == 1) {
-                return checkEnemiesDirectionY(arenaUpdate, actionRatio);
-            } else {
-                return checkEnemiesDirectionX(arenaUpdate, actionRatio);
-            }
+            return false;
+//            int actionRatio = 0;
+//            int direction = 0;
+//            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+//                case "N":
+//                    direction = 1;
+//                    actionRatio = -3;
+//                    break;
+//                case "W":
+//                    direction = 0;
+//                    actionRatio = -3;
+//                    break;
+//                case "E":
+//                    direction = 0;
+//                    actionRatio = 3;
+//                    break;
+//                case "S":
+//                    direction = 1;
+//                    actionRatio = 3;
+//
+//            }
+//            if (direction == 1) {
+//                return checkEnemiesDirectionY(arenaUpdate, actionRatio);
+//            } else {
+//                return checkEnemiesDirectionX(arenaUpdate, actionRatio);
+//            }
 
         }
 
@@ -244,11 +246,9 @@ public class BridgeApplication {
 
         private static boolean checkEnemiesDirectionY(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
 
-            Iterator<Map.Entry<String, BridgeApplication.PlayerState>> iterator = arenaUpdate.arena.state.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, BridgeApplication.PlayerState> e = iterator.next();
+            for (Map.Entry<String, PlayerState> e : arenaUpdate.arena.state.entrySet()) {
                 String s = e.getKey();
-                BridgeApplication.PlayerState p = e.getValue();
+                PlayerState p = e.getValue();
                 if (!s.equals(arenaUpdate._links.self.href)) {
                     if (actionRatio < 0) {
                         if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio
