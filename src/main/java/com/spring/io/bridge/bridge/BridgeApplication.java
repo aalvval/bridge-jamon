@@ -79,19 +79,19 @@ public class BridgeApplication {
                     // Top Left
                     if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S")) {
-                        return "L";
+                        commands.add("L");
                     } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E")) {
-                        return "R";
+                        commands.add("R");
                     }
                 } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y == totalY) {
                     // Bottom Left
                     if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N")) {
-                        return "R";
+                        commands.add("R");
                     } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E")) {
-                        return "L";
+                        commands.add("L");
                     }
                 } else {
                     // Left
@@ -118,19 +118,19 @@ public class BridgeApplication {
                     // Top Right
                     if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S")) {
-                        return "R";
+                        commands.add("R");
                     } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W")) {
-                        return "L";
+                        commands.add("L");
                     }
                 } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y.equals(arenaUpdate.arena.dims.get(1))) {
                     // Bottom Right
                     if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("E") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("N")) {
-                        return "L";
+                        commands.add("L");
                     } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("S") ||
                             arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction.equals("W")) {
-                        return "R";
+                        commands.add("R");
                     }
                 } else {
                     // Right
