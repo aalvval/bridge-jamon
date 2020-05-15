@@ -15,6 +15,73 @@ public class BridgeApplication {
         SpringApplication.run(BridgeApplication.class, args);
     }
 
+    private static boolean iAmBeingHumillated(ArenaUpdate arenaUpdate) {
+        return arenaUpdate.arena.state.get(arenaUpdate._links.self.href).wasHit
+                && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).score < -50;
+    }
+
+    private static boolean fightPossible(BridgeApplication.ArenaUpdate arenaUpdate) {
+        switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+            case "N":
+                return checkEnemiesDirectionY(arenaUpdate, -3);
+            case "W":
+                return checkEnemiesDirectionX(arenaUpdate, -3);
+            case "E":
+                return checkEnemiesDirectionX(arenaUpdate, 3);
+            case "S":
+                return checkEnemiesDirectionY(arenaUpdate, 3);
+            default:
+                return false;
+
+        }
+
+    }
+
+    private static boolean checkEnemiesDirectionX(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
+        Iterator<Map.Entry<String, BridgeApplication.PlayerState>> iterator = arenaUpdate.arena.state.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, BridgeApplication.PlayerState> e = iterator.next();
+            String s = e.getKey();
+            BridgeApplication.PlayerState p = e.getValue();
+            if (!s.equals(arenaUpdate._links.self.href)
+                    && p.y.equals(arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)) {
+                if (actionRatio < 0) {
+                    if (p.x >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio)
+                            && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)
+                        return true;
+                } else {
+                    if (p.x > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x
+                            && (p.x <= arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio))
+                        return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkEnemiesDirectionY(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
+
+        for (Map.Entry<String, PlayerState> e : arenaUpdate.arena.state.entrySet()) {
+            String s = e.getKey();
+            PlayerState p = e.getValue();
+            if (!s.equals(arenaUpdate._links.self.href)
+                    && p.x.equals(arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)) {
+                if (actionRatio < 0) {
+                    if (p.y >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio)
+                            && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)
+                        return true;
+                } else {
+                    if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y
+                            && p.y <= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio))
+                        return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.initDirectFieldAccess();
@@ -60,11 +127,16 @@ public class BridgeApplication {
     static class Algorithm {
         public static String calculate(BridgeApplication.ArenaUpdate arenaUpdate) {
             List<String> commands = new ArrayList<>();
-//            commands.add("T");
             int totalX = arenaUpdate.arena.dims.get(0);
             int totalY = arenaUpdate.arena.dims.get(1);
-
-            if (fightPossible(arenaUpdate)) {
+            // Avid humillation (If i am in a cornet, I am dead)
+            boolean fight = fightPossible(arenaUpdate);
+            boolean humillated = iAmBeingHumillated(arenaUpdate);
+            boolean iCanRun = iCanRun(arenaUpdate);
+            boolean iWasHit = iWasHit(arenaUpdate);
+            if (iWasHit && iCanRun) {
+                return run(arenaUpdate);
+            } else if (fight) {
                 return "T";
             } else if (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x < totalX
                     && arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y < totalY
@@ -194,70 +266,71 @@ public class BridgeApplication {
             return commands.get(i);
         }
 
-        private static boolean fightPossible(BridgeApplication.ArenaUpdate arenaUpdate) {
-//            return false;
-            int actionRatio = 0;
-            int direction = 0;
-            switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+        private static boolean iWasHit(ArenaUpdate arenaUpdate) {
+            return arenaUpdate.arena.state.get(arenaUpdate._links.self.href).wasHit;
+        }
+
+        private static String run(ArenaUpdate arenaUpdate) {
+            PlayerState me = arenaUpdate.arena.state.get(arenaUpdate._links.self.href);
+            switch (me.direction) {
                 case "N":
-                    return checkEnemiesDirectionY(arenaUpdate, -3);
-                case "W":
-                    return checkEnemiesDirectionX(arenaUpdate, -3);
-                case "E":
-                    return checkEnemiesDirectionX(arenaUpdate, 3);
+                    if (isEmpty(arenaUpdate, me.x, me.y + 1)) {
+                        return "F";
+                    } else if (isEmpty(arenaUpdate, me.x + 1, me.y)) {
+                        return "R";
+                    } else if (isEmpty(arenaUpdate, me.x - 1, me.y)) {
+                        return "L";
+                    }
+                    break;
                 case "S":
-                    return checkEnemiesDirectionY(arenaUpdate, 3);
-                default:
-                    return false;
-
+                    if (isEmpty(arenaUpdate, me.x, me.y - 1)) {
+                        return "F";
+                    } else if (isEmpty(arenaUpdate, me.x - 1, me.y)) {
+                        return "R";
+                    } else if (isEmpty(arenaUpdate, me.x + 1, me.y)) {
+                        return "L";
+                    }
+                    break;
+                case "W":
+                    if (isEmpty(arenaUpdate, me.x - 1, me.y)) {
+                        return "F";
+                    } else if (isEmpty(arenaUpdate, me.x, me.y + 1)) {
+                        return "R";
+                    } else if (isEmpty(arenaUpdate, me.x, me.y - 1)) {
+                        return "L";
+                    }
+                    break;
+                case "E":
+                    if (isEmpty(arenaUpdate, me.x + 1, me.y)) {
+                        return "F";
+                    } else if (isEmpty(arenaUpdate, me.x, me.y - 1)) {
+                        return "R";
+                    } else if (isEmpty(arenaUpdate, me.x, me.y + 1)) {
+                        return "L";
+                    }
+                    break;
             }
 
+            return "T";
         }
 
-        private static boolean checkEnemiesDirectionX(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
-            Iterator<Map.Entry<String, BridgeApplication.PlayerState>> iterator = arenaUpdate.arena.state.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, BridgeApplication.PlayerState> e = iterator.next();
-                String s = e.getKey();
-                BridgeApplication.PlayerState p = e.getValue();
-                if (!s.equals(arenaUpdate._links.self.href)
-                        && p.y.equals(arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)) {
-                    if (actionRatio < 0) {
-                        if (p.x >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio)
-                                && p.x < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)
-                            return true;
-                    } else {
-                        if (p.x > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x
-                                && (p.x <= arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x + actionRatio))
-                            return true;
-                    }
-
-                }
-            }
-            return false;
+        private static boolean iCanRun(ArenaUpdate arenaUpdate) {
+            int maxX = arenaUpdate.arena.dims.get(0);
+            int maxY = arenaUpdate.arena.dims.get(1);
+            PlayerState me = arenaUpdate.arena.state.get(arenaUpdate._links.self.href);
+            return isEmpty(arenaUpdate, me.x, me.y - 1)
+                    || isEmpty(arenaUpdate, me.x, me.y + 1)
+                    || isEmpty(arenaUpdate, me.x - 1, me.y)
+                    || isEmpty(arenaUpdate, me.x + 1, me.y);
         }
 
-        private static boolean checkEnemiesDirectionY(BridgeApplication.ArenaUpdate arenaUpdate, int actionRatio) {
-
-            for (Map.Entry<String, PlayerState> e : arenaUpdate.arena.state.entrySet()) {
-                String s = e.getKey();
-                PlayerState p = e.getValue();
-                if (!s.equals(arenaUpdate._links.self.href)
-                        && p.x.equals(arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x)) {
-                    if (actionRatio < 0) {
-                        if (p.y >= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio)
-                                && p.y < arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y)
-                            return true;
-                    } else {
-                        if (p.y > arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y
-                                && p.y <= (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y + actionRatio))
-                            return true;
-                    }
-
-                }
+        private static boolean isEmpty(ArenaUpdate arenaUpdate, int x, int y) {
+            if (x > arenaUpdate.arena.dims.get(0) || y > arenaUpdate.arena.dims.get(1)) {
+                return false;
             }
-            return false;
+            return arenaUpdate.arena.state.entrySet().stream()
+                    .filter(e -> e.getValue().x == x && e.getValue().y == y)
+                    .findFirst().isEmpty();
         }
     }
-
 }
